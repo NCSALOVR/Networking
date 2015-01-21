@@ -3,7 +3,7 @@
   "isAlive": true,
   "address": {
     "city": "New York",
-    "streetAddress": "21 2nd Street",
+    "streetAddress": "121 2nd Street",
     "postalCode": "10021-3100"
   },
   "phoneNumbers": [
@@ -12,5 +12,6 @@
       "type": "home"
     }
   ],
-  "children": []
+  "children": [],
+  "spouse": ["Susan", "Marry", "jenny"]
 }
