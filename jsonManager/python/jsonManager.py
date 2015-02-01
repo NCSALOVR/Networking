@@ -98,5 +98,3 @@ class TestJson(unittest.TestCase):
         self.assertTrue("Betty" in new_central_data['spouse'])
         self.assertEqual(len(new_central_data['spouse']), 3)
         
-
-    
