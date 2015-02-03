@@ -3,6 +3,7 @@ import threading
 import os
 import json
 
+
 def update(centralJson, localJson):
     if type(centralJson) is dict and type(localJson) is dict:
         for local_key, local_value in localJson.iteritems():
@@ -48,14 +49,13 @@ def threadFunc(conn):
     clientFileSize = long(conn.recv(1024))
     print clientFileSize
     clientData = conn.recv(1024)
-    totalReceive = len(clientData)
-
-    while totalReceive < clientFileSize:
-        clientData  = clientData+conn.recv(1024)
-        totalReceive += len(clientData)
+    totalRecv = len(clientData)
+    while totalRecv < clientFileSize:
+        receive = conn.recv(1024)
+        totalRecv += len(receive)
+        clientData = clientData+receive
     print "File Received"
-
-    print clientData
+    
     local_json_data = json.loads(clientData)
     central_json_file = open('central.json')
     central_json_data = json.load(central_json_file)
@@ -68,7 +68,7 @@ def threadFunc(conn):
 
     #TODO: save the central.json and send the updated one back to client
     print central_json_data  
-
+    
     conn.send('Thank you')
     conn.close()
 
