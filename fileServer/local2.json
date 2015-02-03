@@ -1,0 +1,45 @@
+{
+    "_id": "54d00c80a2097cb9f8dab53b",
+    "index": 0,
+    "guid": "77e05dd5-8a0d-4dd6-820c-c8edc7dfd611",
+    "isActive": true,
+    "balance": "$2,647.95",
+    "picture": "http://placehold.it/32x32",
+    "age": 40,
+    "eyeColor": "blue",
+    "name": "Dawson Hurley",
+    "gender": "male",
+    "company": "LIQUIDOC",
+    "email": "dawsonhurley@liquidoc.com",
+    "phone": "+1 (871) 405-3825",
+    "address": "904 Lacon Court, Wheaton, Colorado, 4443",
+    "about": "Reprehenderit cillum consequat quis officia aliquip non aliqua pariatur dolore aliquip elit quis aliquip. Enim anim occaecat pariatur anim tempor qui nulla est ad. Voluptate aliquip ut duis dolor pariatur elit aliqua eu cillum ad laborum est laborum. Mollit elit id ut cillum. Ipsum do anim ea pariatur ipsum aute.\r\n",
+    "registered": "2014-01-19T10:40:47 +06:00",
+    "latitude": 81.196791,
+    "longitude": 116.855387,
+    "tags": [
+      "minim",
+      "veniam",
+      "laborum",
+      "cupidatat",
+      "deserunt",
+      "adipisicing",
+      "laboris"
+    ],
+    "friends": [
+      {
+        "id": 0,
+        "name": "Julia Sears"
+      },
+      {
+        "id": 1,
+        "name": "Beatrice Mack"
+      },
+      {
+        "id": 2,
+        "name": "Tabitha Guthrie"
+      }
+    ],
+    "greeting": "Hello, Dawson Hurley! You have 3 unread messages.",
+    "favoriteFruit": "strawberry"
+}
