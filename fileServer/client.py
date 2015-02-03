@@ -1,5 +1,7 @@
 import socket
 import os
+import threading
+import json
 
 if __name__ == '__main__':
     host = '127.0.0.1'
@@ -22,7 +24,13 @@ if __name__ == '__main__':
                 break
             s.send(bytesToSend)
             print bytesToSend
-    print str(s.recv(1024))
+
+    fileSize = long(s.recv(1024))
+    result = str(s.recv(1024))
+    received = len(result)
+    while received < fileSize:
+	result = result + str(s.recv(1024))
+    print result
     print str(s.recv(1024))
     s.close()
 

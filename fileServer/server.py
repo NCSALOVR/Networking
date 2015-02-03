@@ -16,13 +16,12 @@ def update(centralJson, localJson):
                 centralJson[local_key] = localJson[local_key]
             
     elif type(centralJson) is list and type(localJson) is list:
-        centralJson = centralJson+localJson
-        '''
-        use this instead if duplication in the list is NOT allowed
+        centralJson = localJson
+	'''
         for local_elem in localJson:
             if local_elem not in centralJson:
                 centralJson.append(local_elem)   
-        '''
+	'''
     return centralJson
 
 
@@ -57,8 +56,10 @@ def threadFunc(conn):
     print "File Received"
     
     local_json_data = json.loads(clientData)
-    central_json_file = open('central.json')
-    central_json_data = json.load(central_json_file)
+    central_json_file = open('central.json','r+')
+    central_json_data = {}
+    if long(os.path.getsize('central.json')) > 0:
+	central_json_data = json.load(central_json_file)
     central_json_file.close()
 
     if action == 'update':
@@ -66,7 +67,18 @@ def threadFunc(conn):
     elif action == 'remove':
         central_json_data = remove(central_json_data, local_json_data)
 
-    #TODO: save the central.json and send the updated one back to client
+    with open('central.json','w+') as outfile:
+	json.dump(central_json_data,outfile)
+    conn.send(str(os.path.getsize('central.json')))
+    with open('central.json','rb') as f:
+	bytesToSend = f.read(1024)
+	conn.send(bytesToSend)
+	while True:
+	    bytesToSend = f.read(1024)
+	    if not bytesToSend:
+		break
+	    conn.send(bytesToSend)
+
     print central_json_data  
     
     conn.send('Thank you')
