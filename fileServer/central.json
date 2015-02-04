@@ -1,1 +1,22 @@
-{"phoneNumbers": [{"type": "cell", "number": "212 555-1234"}], "isAlive": true, "firstName": "Jeff", "address": {"postalCode": "10021-3100", "city": "New York", "streetAddress": "121 2nd Street"}, "spouse": ["Susan"], "children": []}
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "isAlive": true,
+  "age": 25,
+  "address": {
+    "streetAddress": "21 2nd Street",
+    "city": "New York",
+    "postalCode": "10021-3100"
+  },
+  "phoneNumbers": [
+    {
+      "type": "home",
+      "number": "212 555-1234"
+    },
+    {
+      "type": "office",
+      "number": "646 555-4567"
+    }
+  ],
+  "spouse": ["Susan", "Marry"]
+}

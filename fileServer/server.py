@@ -2,7 +2,7 @@ import socket
 import threading
 import os
 import json
-
+import sys
 
 def update(centralJson, localJson):
     if type(centralJson) is dict and type(localJson) is dict:
@@ -44,6 +44,7 @@ def remove(centralJson, localJson):
 
 
 def threadFunc(conn):
+    #receiving data to be used in update/remove from client
     action = conn.recv(1024)
     clientFileSize = long(conn.recv(1024))
     print clientFileSize
@@ -54,12 +55,13 @@ def threadFunc(conn):
         totalRecv += len(receive)
         clientData = clientData+receive
     print "File Received"
-    
+
+    #manipulate the central json based on the action and data from client    
     local_json_data = json.loads(clientData)
     central_json_file = open('central.json','r+')
     central_json_data = {}
     if long(os.path.getsize('central.json')) > 0:
-	central_json_data = json.load(central_json_file)
+	   central_json_data = json.load(central_json_file)
     central_json_file.close()
 
     if action == 'update':
@@ -67,21 +69,15 @@ def threadFunc(conn):
     elif action == 'remove':
         central_json_data = remove(central_json_data, local_json_data)
 
-    with open('central.json','w+') as outfile:
-	json.dump(central_json_data,outfile)
-    conn.send(str(os.path.getsize('central.json')))
-    with open('central.json','rb') as f:
-	bytesToSend = f.read(1024)
-	conn.send(bytesToSend)
-	while True:
-	    bytesToSend = f.read(1024)
-	    if not bytesToSend:
-		break
-	    conn.send(bytesToSend)
+    #save the updated central json (save to different location for testing).
+    with open('central_updated.json','w+') as outfile:
+	   json.dump(central_json_data,outfile)
+
+    #send the updated one back to client
+    conn.send(str(sys.getsizeof(json.dumps(central_json_data))))
+    conn.send(json.dumps(central_json_data))
 
     print central_json_data  
-    
-    conn.send('Thank you')
     conn.close()
 
 

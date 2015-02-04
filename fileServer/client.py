@@ -10,6 +10,7 @@ if __name__ == '__main__':
     s = socket.socket()
     s.connect((host, port))
 
+    #sending data to be used in update/remove to server
     action = raw_input("Action(update/remove)? -> ")
     s.send(action)
     filePath = raw_input("Json file path to use for update/remove? -> ")
@@ -23,15 +24,16 @@ if __name__ == '__main__':
             if not bytesToSend:
                 break
             s.send(bytesToSend)
-            print bytesToSend
+    f.close()
 
-    fileSize = long(s.recv(1024))
-    result = str(s.recv(1024))
-    received = len(result)
-    while received < fileSize:
-	result = result + str(s.recv(1024))
-    print result
-    print str(s.recv(1024))
+    #receiving and saving updated json from server
+    serverDataSize = long(s.recv(1024))
+    updatedFilePath = raw_input("Path to save updated json? -> ")
+    f = open(updatedFilePath, 'wb')
+    serverData = s.recv(serverDataSize)
+    f.write(serverData)
+    print "Updated File Saved"
+    f.close()
     s.close()
 
     
