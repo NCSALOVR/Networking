@@ -28,6 +28,7 @@ if __name__ == '__main__':
 
     #receiving and saving updated json from server
     serverDataSize = long(s.recv(1024))
+    
     updatedFilePath = raw_input("Path to save updated json? -> ")
     f = open(updatedFilePath, 'wb')
     serverData = s.recv(serverDataSize)

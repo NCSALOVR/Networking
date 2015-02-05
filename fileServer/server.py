@@ -3,6 +3,9 @@ import threading
 import os
 import json
 import sys
+import time
+
+central_json_data = {}
 
 def update(centralJson, localJson):
     if type(centralJson) is dict and type(localJson) is dict:
@@ -58,11 +61,15 @@ def threadFunc(conn):
 
     #manipulate the central json based on the action and data from client    
     local_json_data = json.loads(clientData)
-    central_json_file = open('central.json','r+')
+    global central_json_data
     central_json_data = {}
-    if long(os.path.getsize('central.json')) > 0:
-	   central_json_data = json.load(central_json_file)
-    central_json_file.close()
+
+    try:
+        with open('central.json','r+') as central_json_file:
+            if long(os.path.getsize('central.json')) > 0:
+                central_json_data = json.load(central_json_file)
+    except IOError as e:
+        print "Unable to open central.json"
 
     if action == 'update':
         central_json_data = update(central_json_data, local_json_data)
@@ -75,6 +82,7 @@ def threadFunc(conn):
 
     #send the updated one back to client
     conn.send(str(sys.getsizeof(json.dumps(central_json_data))))
+    time.sleep(.0001)
     conn.send(json.dumps(central_json_data))
 
     print central_json_data  
