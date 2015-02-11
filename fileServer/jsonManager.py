@@ -37,6 +37,6 @@ def delete(centralJson, localJson):
     elif type(centralJson) is list and type(localJson) is list:
         for local_elem in localJson:
             if local_elem in centralJson:
-                centralJson.delete(local_elem)
+                centralJson.remove(local_elem)
     
     return centralJson

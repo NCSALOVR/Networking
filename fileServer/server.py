@@ -26,6 +26,7 @@ def threadFunc(conn):
         for x in profiles:
             if x.id == t:
                 p = x
+        #TODO: when id is not a number and when id is not an id of the existing profile
         
     #receiving data to be used in update/delete from client
     action = conn.recv(1024)
@@ -47,7 +48,7 @@ def threadFunc(conn):
     elif action == 'delete':
         central_json_data = jm.delete(central_json_data, local_json_data)
         for x in profiles:
-            x.delete = jm.delete(x.update,local_json_data)
+            x.delete = jm.update(x.delete,local_json_data)
 
     #send the updated one back to client
     if action == 'update':
