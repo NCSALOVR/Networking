@@ -9,7 +9,15 @@ if __name__ == '__main__':
 
     s = socket.socket()
     s.connect((host, port))
-
+    mesg = s.recv(1048)
+    action = raw_input(mesg)
+    id = 0
+    if action == "new":
+	s.send(action)
+	id = long(s.recv(1024))
+	print id
+    else:
+	s.send(action)
     #sending data to be used in update/remove to server
     action = raw_input("Action(update/remove)? -> ")
     s.send(action)

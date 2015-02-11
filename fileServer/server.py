@@ -5,13 +5,28 @@ import json
 import sys
 import time
 import jsonManager as jm
+import profile as pro
 
 central_json_data = {}
-
-
+profiles = []
 
 def threadFunc(conn):
     global central_json_data
+    global profiles
+    #check with registration
+    conn.send("Registered?")
+    id = conn.recv(1024)
+    p  = 0
+    if id == "new":
+	p = pro.Profile(id,central_json_data,profiles)
+	profiles.append(p)
+	conn.send(str(p.id))
+    else: 
+	t = long(id)
+	for x in profiles:
+		if x.id == t:
+			p = x
+	
     #receiving data to be used in update/remove from client
     action = conn.recv(1024)
     clientFileSize = long(conn.recv(1024))
@@ -27,14 +42,28 @@ def threadFunc(conn):
     local_json_data = json.loads(clientData)
     if action == 'update':
         central_json_data = jm.update(central_json_data, local_json_data)
+	for x in profiles:
+		x.update = jm.update(x.update,local_json_data)
     elif action == 'remove':
         central_json_data = jm.remove(central_json_data, local_json_data)
-
+	for x in profiles:
+		x.delete = jm.delete(x.update,local_json_data)
 
     #send the updated one back to client
-    conn.send(str(sys.getsizeof(json.dumps(central_json_data))))
-    time.sleep(.0001)
-    conn.send(json.dumps(central_json_data))
+    if action == 'update':
+    	conn.send(str(len(json.dumps(p.update))))
+    	time.sleep(.0001)
+    	conn.send(json.dumps(p.update))
+	p.update = {}
+    elif action == 'remove':
+	conn.send(str(len(json.dumps(p.delete))))
+	time.sleep(.0001)
+	conn.send(json.dumps(p.delete))
+	p.delete = {}
+    else:
+	conn.send(str(len(json.dumps(central_json_data))))
+	time.sleep(.0001)
+	conn.send(json.dumps(central_json_data))
 
     print central_json_data  
     conn.close()
