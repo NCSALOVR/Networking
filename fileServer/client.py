@@ -13,15 +13,15 @@ if __name__ == '__main__':
     action = raw_input(mesg)
     id = 0
     if action == "new":
-	s.send(action)
-	id = long(s.recv(1024))
-	print id
+	   s.send(action)
+	   id = long(s.recv(1024))
+	   print id
     else:
-	s.send(action)
-    #sending data to be used in update/remove to server
-    action = raw_input("Action(update/remove)? -> ")
+	   s.send(action)
+    #sending data to be used in update/delete to server
+    action = raw_input("Action(update/delete)? -> ")
     s.send(action)
-    filePath = raw_input("Json file path to use for update/remove? -> ")
+    filePath = raw_input("Json file path to use for update/delete? -> ")
     s.send(str(os.path.getsize(filePath)))
 
     with open(filePath, 'rb') as f:

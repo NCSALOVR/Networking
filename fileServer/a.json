@@ -1,0 +1,1 @@
+{"phoneNumbers": [{"type": "cell", "number": "212 555-1234"}], "isAlive": true, "firstName": "Jeff", "lastName": "Smith", "age": 25, "address": {"postalCode": "10021-3100", "city": "New York", "streetAddress": "121 2nd Street"}, "spouse": ["Susan"], "children": []}
