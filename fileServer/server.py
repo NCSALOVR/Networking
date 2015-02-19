@@ -27,7 +27,7 @@ def threadFunc(conn):
             if x.id == t:
                 p = x
         #TODO: when id is not a number and when id is not an id of the existing profile
-        
+    id = p.id    
     #receiving data to be used in update/delete from client
     action = conn.recv(1024)
     clientFileSize = long(conn.recv(1024))
@@ -42,13 +42,23 @@ def threadFunc(conn):
     #manipulate the central json based on the action and data from client    
     local_json_data = json.loads(clientData)
     if action == 'update':
-        central_json_data = jm.update(central_json_data, local_json_data)
-        for x in profiles:
-            x.update = jm.update(x.update,local_json_data)
+	if id in central_json_data:
+        	central_json_data[str(id)] = jm.update(central_json_data[str(id)], local_json_data)
+        else:
+		central_json_data[str(id)] = jm.update({},local_json_data)
+	for x in profiles:
+	    if id in x.update:
+            	x.update[str(id)] = jm.update(x.update[str(id)],local_json_data)
+	    else:
+		x.update[str(id)] = jm.update({},local_json_data)
     elif action == 'delete':
-        central_json_data = jm.delete(central_json_data, local_json_data)
-        for x in profiles:
-            x.delete = jm.update(x.delete,local_json_data)
+	if id in central_json_data:
+        	central_json_data[str(id)] = jm.delete(central_json_data[str(id)], local_json_data)
+	for x in profiles:
+	    if id in x.delete:
+            	x.delete[str(id)] = jm.update(x.delete[str(id)],local_json_data)
+	    else:
+		x.delete[str(id)] = jm.update({},local_json_data)
 
     #send the updated one back to client
     if action == 'update':
