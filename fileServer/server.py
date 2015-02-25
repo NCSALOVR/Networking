@@ -6,6 +6,7 @@ import sys
 import time
 import jsonManager as jm
 import profile as pro
+import socketHelper as sh
 
 central_json_data = {}
 profiles = []
@@ -14,13 +15,13 @@ def threadFunc(conn):
     global central_json_data
     global profiles
     #check with registration
-    conn.send("Registered?")
-    id = conn.recv(1024)
+    sh.send_msg(conn,"Registered?")
+    id = sh.recv_msg(conn)
     p  = 0
     if id == "new":
         p = pro.Profile(id,central_json_data,profiles)
         profiles.append(p)
-        conn.send(str(p.id))
+        sh.send_msg(conn, str(p.id))
     else: 
         t = long(id)
         for x in profiles:
@@ -28,54 +29,44 @@ def threadFunc(conn):
                 p = x
         #TODO: when id is not a number and when id is not an id of the existing profile
     id = p.id    
+
     #receiving data to be used in update/delete from client
-    action = conn.recv(1024)
-    clientFileSize = long(conn.recv(1024))
-    print clientFileSize
-    clientData = conn.recv(1024)
-    totalRecv = len(clientData)
-    while totalRecv < clientFileSize:
-        receive = conn.recv(1024)
-        totalRecv += len(receive)
-        clientData = clientData+receive
+    action = sh.recv_msg(conn)
+    clientData = sh.recv_msg(conn)
     print "File Received"
+
     #manipulate the central json based on the action and data from client    
     local_json_data = json.loads(clientData)
     if action == 'update':
-	if id in central_json_data:
-        	central_json_data[str(id)] = jm.update(central_json_data[str(id)], local_json_data)
+        if id in central_json_data:
+            central_json_data[id] = jm.update(central_json_data[id], local_json_data)
         else:
-		central_json_data[str(id)] = jm.update({},local_json_data)
-	for x in profiles:
-	    if id in x.update:
-            	x.update[str(id)] = jm.update(x.update[str(id)],local_json_data)
-	    else:
-		x.update[str(id)] = jm.update({},local_json_data)
+            central_json_data[id] = jm.update({},local_json_data)
+        for x in profiles:
+            if id in x.update:
+                x.update[id] = jm.update(x.update[id],local_json_data)
+            else:
+                x.update[id] = jm.update({},local_json_data)
+
     elif action == 'delete':
-	if id in central_json_data:
-        	central_json_data[str(id)] = jm.delete(central_json_data[str(id)], local_json_data)
-	for x in profiles:
-	    if id in x.delete:
-            	x.delete[str(id)] = jm.update(x.delete[str(id)],local_json_data)
-	    else:
-		x.delete[str(id)] = jm.update({},local_json_data)
+        if id in central_json_data:
+            print 'mee'
+            central_json_data[id] = jm.delete(central_json_data[id], local_json_data)
+        for x in profiles:
+            if id in x.delete:
+                x.delete[id] = jm.update(x.delete[id],local_json_data)
+            else:
+                x.delete[id] = jm.update({},local_json_data)
 
     #send the updated one back to client
     if action == 'update':
-        conn.send(str(len(json.dumps(p.update))))
-        time.sleep(.0001)
-        conn.send(json.dumps(p.update))
+        sh.send_msg(conn, json.dumps(p.update))
         p.update = {}
     elif action == 'delete':
-        conn.send(str(len(json.dumps(p.delete))))
-        time.sleep(.0001)
-        conn.send(json.dumps(p.delete))
+        sh.send_msg(conn, json.dumps(p.delete))
         p.delete = {}
     else:
-        conn.send(str(len(json.dumps(central_json_data))))
-        time.sleep(.0001)
-        conn.send(json.dumps(central_json_data))
-
+        sh.send_msg(conn, json.dumps(central_json_data))
     print central_json_data  
     conn.close()
 

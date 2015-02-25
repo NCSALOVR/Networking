@@ -13,5 +13,6 @@
     }
   ],
   "children": [],
-  "spouse": ["Susan", "Marry", "jenny"]
+  "spouse": ["Susan", "Marry", "jenny"],
+  "nationality": "USA"
 }
