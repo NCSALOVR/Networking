@@ -50,7 +50,6 @@ def threadFunc(conn):
 
     elif action == 'delete':
         if id in central_json_data:
-            print 'mee'
             central_json_data[id] = jm.delete(central_json_data[id], local_json_data)
         for x in profiles:
             if id in x.delete:
