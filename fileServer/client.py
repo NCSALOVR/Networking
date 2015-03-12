@@ -9,7 +9,7 @@ if __name__ == '__main__':
     port = 8000
 
     while(True):
-        action = raw_input("Registration (new if new): ")
+        action = raw_input("Registration ('new'/your id/'end'): ")
         id = 0
         if action == "end":
             print "Goodbye"
@@ -26,6 +26,10 @@ if __name__ == '__main__':
             print error_code
             s.close()
             continue
+
+        if action != "new":
+            id = long(action)
+            
         print "You are id "+str(id)
         print "Use that id to login in the future"
 

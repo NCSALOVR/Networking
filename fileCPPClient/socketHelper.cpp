@@ -30,6 +30,7 @@ std::string recv_msg(int sockfd){
 
 std::string recv_num_bytes(int sockfd, uint32_t num_bytes){
     char* data = (char*) malloc(num_bytes+1);
+    data[num_bytes] = '\0';
 
     int num_bytes_recv = 0;
     int curr_num_bytes_recv;
