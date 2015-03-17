@@ -10,6 +10,18 @@ import socketHelper as sh
 
 central_json_data = {}
 profiles = []
+stateLock = threading.Lock()
+profileLock = threading.Lock()
+
+def period(conn,p):
+    stateLock.acquire()
+    profileLock.acquire() 
+    sh.send_msg(conn, json.dumps(p.update))
+    sh.send_msg(conn, json.dumps(p.delete))
+    p.update = {}
+    p.delete = {}
+    profileLock.release()
+    stateLock.release() 
 
 def threadFunc(conn):
     global central_json_data
@@ -19,7 +31,9 @@ def threadFunc(conn):
     p  = 0
     if id == "new":
         p = pro.Profile(id,central_json_data,profiles)
+        profileLock.acquire()
         profiles.append(p)
+        profileLock.release()
         sh.send_msg(conn, str(p.id))
     else:
         if not id.isdigit():
@@ -48,26 +62,45 @@ def threadFunc(conn):
             local_json_data = json.loads(clientData)
             print "File Received"
 
+        if action == 'period':
+            t = sh.recv_msg(conn)
+            timer = threading.Timer(t, period, [conn,p])
+            timer.start()
+            while(True):
+                command = sh.recv_msg(conn)
+                if command == 'end':
+                    timer.cancel()
+                    conn.close()
+                    return
+
         #manipulate the central json based on the action and data from client    
         if action == 'update':
+            stateLock.acquire()
             if id in central_json_data:
                 central_json_data[id] = jm.update(central_json_data[id], local_json_data)
             else:
                 central_json_data[id] = jm.update({},local_json_data)
             for x in profiles:
+                profileLock.acquire()
                 if id in x.update:
                     x.update[id] = jm.update(x.update[id],local_json_data)
                 else:
                     x.update[id] = jm.update({},local_json_data)
+                profileLock.release()
+            stateLock.release()
 
         elif action == 'delete':
+            stateLock.acquire()
             if id in central_json_data:
                 central_json_data[id] = jm.delete(central_json_data[id], local_json_data)
             for x in profiles:
+                profileLock.acquire()
                 if id in x.delete:
                     x.delete[id] = jm.update(x.delete[id],local_json_data)
                 else:
                     x.delete[id] = jm.update({},local_json_data)
+                profileLock.release()
+            stateLock.release()
         elif action == 'end':
             sh.send_msg(conn, "goodbye")
             print "Connection with profile "+str(id)+" closed"
@@ -76,13 +109,23 @@ def threadFunc(conn):
 
         #send the updated one back to client
         if action == 'update':
+            stateLock.acquire()
+            profileLock.acquire()
             sh.send_msg(conn, json.dumps(p.update))
             p.update = {}
+            profileLock.release()
+            stateLock.release()
         elif action == 'delete':
+            stateLock.acquire()
+            profileLock.acquire()
             sh.send_msg(conn, json.dumps(p.delete))
             p.delete = {}
+            profileLock.release()
+            stateLock.release()
         else:
+            stateLock.acquire()
             sh.send_msg(conn, json.dumps(central_json_data))
+            stateLock.release()
         print central_json_data  
     conn.close()
 

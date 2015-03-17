@@ -7,7 +7,7 @@ import time
 
 def threadCtoS():
     host = '127.0.0.1'
-    c_to_s_port = 9007
+    c_to_s_port = 8000
     c_to_s_soc = socket.socket()
     c_to_s_soc.connect((host,c_to_s_port))
     while(True):
