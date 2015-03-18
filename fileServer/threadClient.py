@@ -24,6 +24,8 @@ def threadCtoS():
         if(len(command)==0):
             continue
         action = command[0]
+        if not (action=="end" or action=="update" or action == "delete"):
+            continue
         sh.send_msg(c_to_s_soc,action)
         if(len(command)==2):
             data = command[1]
@@ -80,8 +82,10 @@ def period(conn,t):
     except:
         return
     dataLock.acquire()
-    updates.append(update)
-    deletes.append(delete)
+    if len(update)>0:
+        updates.append(json.loads(update))
+    if len(delete)>0:
+        deletes.append(json.loads(delete))
     dataLock.release()
     threading.Timer(t,period,[conn,t]).start()
 

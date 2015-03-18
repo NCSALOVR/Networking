@@ -16,6 +16,9 @@ if __name__ == '__main__':
         pass
     threadClient.begin(action,t)
     while(True):
+        up = threadClient.getUpdate()
+        if not (up == {}):
+            print up
         action = raw_input("Action(update/delete/end)? -> ")
         data = {}
         if action=="update" or action=="delete":
