@@ -20,7 +20,7 @@ def period(conn,id,t):
     for x in profiles:
         if x.id == id:
             p = x
-    if len(p.update.keys())==0 and len(p.delete.keys()) == 0:
+    if p.update=={} and p.delete=={}:
         profileLock.release()
         stateLock.release()
         threading.Timer(t,period,[conn,id,t]).start()

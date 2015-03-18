@@ -113,9 +113,11 @@ def handshake(s):
         if not error_code == "ok":
             print error_code
             s.close()
+            print "Error, please close program"
             return False
         return True
     except:
+        print "Error in handshake, please close program"
         return False
 
 def begin(reg,t):
