@@ -13,15 +13,30 @@ profiles = []
 stateLock = threading.Lock()
 profileLock = threading.Lock()
 
-def period(conn,p):
+def period(conn,id,t):
     stateLock.acquire()
     profileLock.acquire() 
-    sh.send_msg(conn, json.dumps(p.update))
-    sh.send_msg(conn, json.dumps(p.delete))
-    p.update = {}
-    p.delete = {}
+    p = 0
+    for x in profiles:
+        if x.id == id:
+            p = x
+    if len(p.update.keys())==0 and len(p.delete.keys()) == 0:
+        profileLock.release()
+        stateLock.release()
+        threading.Timer(t,period,[conn,id,t]).start()
+        return
+    try: 
+        sh.send_msg(conn, json.dumps(p.update))
+        sh.send_msg(conn, json.dumps(p.delete))
+        p.update = {}
+        p.delete = {}
+    except:
+        profileLock.release()
+        stateLock.release()
+        return
     profileLock.release()
-    stateLock.release() 
+    stateLock.release()
+    threading.Timer(t, period, [conn,id,t]).start() 
 
 def threadFunc(conn):
     global central_json_data
@@ -57,21 +72,19 @@ def threadFunc(conn):
     while(True):
         #receiving data to be used in update/delete from client
         action = sh.recv_msg(conn)
-        if action != 'end':
+        if not (action == 'end' or action == 'period'):
             clientData = sh.recv_msg(conn)
             local_json_data = json.loads(clientData)
             print "File Received"
 
         if action == 'period':
             t = sh.recv_msg(conn)
-            timer = threading.Timer(t, period, [conn,p])
+            timer = threading.Timer(float(t), period, [conn,id,float(t)])
             timer.start()
-            while(True):
-                command = sh.recv_msg(conn)
-                if command == 'end':
-                    timer.cancel()
-                    conn.close()
-                    return
+            command = sh.recv_msg(conn)
+            timer.cancel()
+            conn.close()
+            return
 
         #manipulate the central json based on the action and data from client    
         if action == 'update':
@@ -112,21 +125,18 @@ def threadFunc(conn):
             stateLock.acquire()
             profileLock.acquire()
             sh.send_msg(conn, json.dumps(p.update))
-            p.update = {}
             profileLock.release()
             stateLock.release()
         elif action == 'delete':
             stateLock.acquire()
             profileLock.acquire()
             sh.send_msg(conn, json.dumps(p.delete))
-            p.delete = {}
             profileLock.release()
             stateLock.release()
         else:
             stateLock.acquire()
             sh.send_msg(conn, json.dumps(central_json_data))
             stateLock.release()
-        print central_json_data  
     conn.close()
 
 
