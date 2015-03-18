@@ -103,13 +103,16 @@ def threadStoC(t):
     print "threadStoC finished"
 
 def handshake(s):
-    sh.send_msg(s, str(id))
-    error_code = sh.recv_msg(s)
-    if not error_code == "ok":
-        print error_code
-        s.close()
+    try: 
+        sh.send_msg(s, str(id))
+        error_code = sh.recv_msg(s)
+        if not error_code == "ok":
+            print error_code
+            s.close()
+            return False
+        return True
+    except:
         return False
-    return True
 
 def begin(reg,t):
     host = '127.0.0.1'
