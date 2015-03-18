@@ -133,7 +133,8 @@ def begin(reg,t):
     if not error_code == "ok":
         print error_code
         s.close()
-        #continue
+        print "Please exit the program now"
+        return
 
     if action != "new":
         id = long(action)
