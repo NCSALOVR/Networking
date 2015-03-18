@@ -3,53 +3,30 @@ import os
 import threading
 import json
 import socketHelper as sh
+import threadClient
 
 if __name__ == '__main__':
-    host = '127.0.0.1'
-    port = 8000
 
+    action = raw_input("Registration ('new'/your id/'end'): ")
+    t = 1
+    try:
+        interval = raw_input("Interval between updates(seconds): ")
+        t = float(interval)
+    except:
+        pass
+    threadClient.begin(action,t)
     while(True):
-        action = raw_input("Registration ('new'/your id/'end'): ")
-        id = 0
-        if action == "end":
-            print "Goodbye"
-            quit()
-        s = socket.socket()
-        s.connect((host,port))
-        if action == "new":
-            sh.send_msg(s, action)
-            id = long(sh.recv_msg(s))
-        else:
-            sh.send_msg(s, action)
-        error_code = sh.recv_msg(s)
-        if not error_code == "ok":
-            print error_code
-            s.close()
-            continue
-
-        if action != "new":
-            id = long(action)
-            
-        print "You are id "+str(id)
-        print "Use that id to login in the future"
-
-        #sending data to be used in update/delete to server
-        while (True):
-            action = raw_input("Action(update/delete/end)? -> ")
-            sh.send_msg(s,action)
-            if action!="end":
-                 filePath = raw_input("Json file path to use for update/delete? -> ")
-
-                 with open(filePath, 'rb') as f:
-                     sh.send_msg(s, f.read())
-                 f.close()
-
-             #receiving the update from server
-
-            serverData = sh.recv_msg(s)
-            print serverData
-            if serverData == "goodbye":
-                s.close()
-                break
-
-    
+        action = raw_input("Action(update/delete/end)? -> ")
+        data = {}
+        if action=="update" or action=="delete":
+            filePath = raw_input("Json file path to use for update/delete? -> ")
+            try:
+                f = open(filePath)
+                data = json.load(f)
+                f.close()
+            except:
+                print("Not a valid file: "+filePath)
+                continue
+        threadClient.sendCommand(action,data)
+        if(action=="end"):
+            break

@@ -111,12 +111,11 @@ def handshake(s):
         return False
     return True
 
-if __name__ == '__main__':
+def begin(reg,t):
     host = '127.0.0.1'
     port = 8000
 
-    #while(True):
-    action = raw_input("Registration ('new'/your id/'end'): ")
+    action = reg
     if action == "end":
         print "Goodbye"
         quit()
@@ -141,29 +140,8 @@ if __name__ == '__main__':
     sh.send_msg(s,"end")
     sh.recv_msg(s)
     s.close()
-    t = 1
-    try:
-        interval = raw_input("Interval between updates(seconds): ")
-        t = float(interval)
-    except:
-        pass
     updateLock.acquire()
     t_write = threading.Thread(target=threadCtoS, args=())
     t_read = threading.Thread(target=threadStoC, args=(t,))
     t_write.start()
     t_read.start()
-    while(True):
-        action = raw_input("Action(update/delete/end)? -> ")
-        data = {}
-        if action=="update" or action=="delete":
-            filePath = raw_input("Json file path to use for update/delete? -> ")
-            try:
-                f = open(filePath)
-                data = json.load(f)
-                f.close()
-            except:
-                print("Not a valid file: "+filePath)
-                continue
-        sendCommand(action,data)
-        if(action=="end"):
-            break
