@@ -85,7 +85,7 @@ def threadFunc(conn):
             timer.cancel()
             conn.close()
             return
-
+            
         #manipulate the central json based on the action and data from client    
         if action == 'update':
             stateLock.acquire()
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     port = 8000
     s = socket.socket()
     s.bind((host,port))
-    s.listen(1)
+    s.listen(3)
     print "Start Server"
     while True:
         conn, addr = s.accept()
