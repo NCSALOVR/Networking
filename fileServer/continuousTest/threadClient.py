@@ -29,14 +29,13 @@ def threadCtoS():
         sh.send_msg(c_to_s_soc,action)
         if(len(command)==2):
             data = command[1]
-            sh.send_msg(c_to_s_soc,json.dumps(data))
+            sh.send_msg(c_to_s_soc,data)
         #receiving the update from server
         serverData = sh.recv_msg(c_to_s_soc)
         if serverData == "goodbye":
             c_to_s_soc.close()
             updateLock.release()
             break
-    print "threadCtoS finished"
 
 def getUpdate():
     dataLock.acquire()
@@ -65,8 +64,8 @@ def getCommand():
     dataLock.release()
     return temp
 
-def sendCommand(command, data = {}):
-    if len(data.keys())==0:
+def sendCommand(command, data):
+    if len(data)==0:
         dataLock.acquire()
         commands.append([command])
         dataLock.release()
@@ -76,37 +75,35 @@ def sendCommand(command, data = {}):
     dataLock.release()
     return
 
+def period(conn,t):
+    try:
+        update = sh.recv_msg(conn)
+        delete = sh.recv_msg(conn)
+    except:
+        return
+    dataLock.acquire()
+    if len(update)>0:
+        updates.append(json.loads(update))
+    if len(delete)>0:
+        deletes.append(json.loads(delete))
+    dataLock.release()
+    threading.Timer(t,period,[conn,t]).start()
+
 def threadStoC(t):
     host = '127.0.0.1'
     s_to_c_port = 8000
     s_to_c_soc = socket.socket()
     s_to_c_soc.connect((host,s_to_c_port))
-    s_to_c_soc.settimeout(t)
-
-    if not (handshake(s_to_c_soc)):
-        print "handshake s_to_c error"
-        return
-
-    sh.send_msg(s_to_c_soc,"period")
-    sh.send_msg(s_to_c_soc,str(t))
-    while(True):
-        time.sleep(t)
-        if(updateLock.acquire(False)):
-            updateLock.release()
-            sh.send_msg(s_to_c_soc,"end")
-            s_to_c_soc.close()
-            break;
-        try:
-            update = sh.recv_msg(s_to_c_soc)
-            delete = sh.recv_msg(s_to_c_soc)
-        except:
-            continue;
-        dataLock.acquire()
-        if len(update)>0:
-            updates.append(json.loads(update))
-        if len(delete)>0:
-            deletes.append(json.loads(delete))
-        dataLock.release()
+    if handshake(s_to_c_soc):
+        sh.send_msg(s_to_c_soc,"period")
+        sh.send_msg(s_to_c_soc,str(t))
+        timer = threading.Timer(t,period,[s_to_c_soc,t])
+        timer.start()
+        updateLock.acquire()
+        updateLock.release()
+        timer.cancel()
+        sh.send_msg(s_to_c_soc,"end")
+        s_to_c_soc.close()
     print "threadStoC finished"
 
 def handshake(s):
@@ -124,7 +121,6 @@ def handshake(s):
         return False
 
 def begin(reg,t):
-    global id
     host = '127.0.0.1'
     port = 8000
 

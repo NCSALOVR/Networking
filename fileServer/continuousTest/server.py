@@ -12,34 +12,31 @@ central_json_data = {}
 profiles = []
 stateLock = threading.Lock()
 profileLock = threading.Lock()
-toEnd = False
 
 def period(conn,id,t):
-    while(True):
-        time.sleep(t)        
-        if toEnd:
-            break;
-        stateLock.acquire()
-        profileLock.acquire() 
-        p = 0
-        for x in profiles:
-            if x.id == id:
-                p = x
-        if p.update=={} and p.delete=={}:
-            profileLock.release()
-            stateLock.release()
-            continue;
-        try: 
-            sh.send_msg(conn, json.dumps(p.update))
-            sh.send_msg(conn, json.dumps(p.delete))
-            p.update = {}
-            p.delete = {}
-        except:
-            profileLock.release()
-            stateLock.release()
-            return
+    stateLock.acquire()
+    profileLock.acquire() 
+    p = 0
+    for x in profiles:
+        if x.id == id:
+            p = x
+    if p.update=={} and p.delete=={}:
         profileLock.release()
         stateLock.release()
+        threading.Timer(t,period,[conn,id,t]).start()
+        return
+    try: 
+        sh.send_msg(conn, json.dumps(p.update))
+        sh.send_msg(conn, json.dumps(p.delete))
+        p.update = {}
+        p.delete = {}
+    except:
+        profileLock.release()
+        stateLock.release()
+        return
+    profileLock.release()
+    stateLock.release()
+    threading.Timer(t, period, [conn,id,t]).start() 
 
 def threadFunc(conn):
     global central_json_data
@@ -71,20 +68,25 @@ def threadFunc(conn):
             conn.close()
             return
     sh.send_msg(conn,"ok")
-    id = p.id
+    id = p.id    
     while(True):
         #receiving data to be used in update/delete from client
         action = sh.recv_msg(conn)
         if not (action == 'end' or action == 'period'):
             clientData = sh.recv_msg(conn)
             local_json_data = json.loads(clientData)
+            print local_json_data
             print "File Received"
 
         if action == 'period':
             t = sh.recv_msg(conn)
-            periodThread = threading.Thread(target=period, args=(conn,id,float(t)))
-            periodThread.start()
-
+            timer = threading.Timer(float(t), period, [conn,id,float(t)])
+            timer.start()
+            command = sh.recv_msg(conn)
+            timer.cancel()
+            conn.close()
+            return
+            
         #manipulate the central json based on the action and data from client    
         if action == 'update':
             stateLock.acquire()
@@ -116,7 +118,6 @@ def threadFunc(conn):
         elif action == 'end':
             sh.send_msg(conn, "goodbye")
             print "Connection with profile "+str(id)+" closed"
-            toEnd = True
             conn.close() 
             return 
 
