@@ -20,7 +20,7 @@
 
 int main(int argc, char* argv[]) {
 
-	const char * host = "127.0.0.1";
+	const char * host = "141.142.21.57";
 	int port = 8000;
 
 	//setting up and initialize winsock

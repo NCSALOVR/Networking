@@ -15,10 +15,11 @@ profileLock = threading.Lock()
 toEnd = False
 
 def period(conn,id,t):
+    global toEnd
     while(True):
         time.sleep(t)        
         if toEnd:
-            break;
+            break
         stateLock.acquire()
         profileLock.acquire() 
         p = 0
@@ -28,20 +29,24 @@ def period(conn,id,t):
         if p.update=={} and p.delete=={}:
             profileLock.release()
             stateLock.release()
-            continue;
-        try: 
-            sh.send_msg(conn, json.dumps(p.update))
-            sh.send_msg(conn, json.dumps(p.delete))
-            p.update = {}
-            p.delete = {}
-        except:
+            continue
+        
+        
+        if (not sh.send_msg(conn, json.dumps(p.update))) or (not sh.send_msg(conn, json.dumps(p.delete))):
             profileLock.release()
             stateLock.release()
+            conn.close()
+            print "Oh dear"
             return
+        print "Sent file for profile "+str(id)
+        print json.dumps(p.update)
+        p.update = {}
+        p.delete = {}
         profileLock.release()
         stateLock.release()
 
 def threadFunc(conn):
+    global toEnd
     global central_json_data
     global profiles
     #check with registration
@@ -75,10 +80,10 @@ def threadFunc(conn):
     while(True):
         #receiving data to be used in update/delete from client
         action = sh.recv_msg(conn)
+        local_json_data = {}
         if not (action == 'end' or action == 'period'):
             clientData = sh.recv_msg(conn)
             local_json_data = json.loads(clientData)
-            print "File Received"
 
         if action == 'period':
             t = sh.recv_msg(conn)
@@ -131,7 +136,7 @@ def threadFunc(conn):
 
 
 if __name__ == '__main__':
-    host = '127.0.0.1'
+    host = '141.142.21.57'
     port = 8000
     s = socket.socket()
     s.bind((host,port))

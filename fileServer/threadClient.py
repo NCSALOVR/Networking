@@ -12,7 +12,7 @@ dataLock = threading.Lock()
 updateLock = threading.Lock()
 
 def threadCtoS():
-    host = '127.0.0.1'
+    host = '141.142.21.57'
     c_to_s_port = 8000
     c_to_s_soc = socket.socket()
     c_to_s_soc.connect((host,c_to_s_port))
@@ -77,7 +77,7 @@ def sendCommand(command, data = {}):
     return
 
 def threadStoC(t):
-    host = '127.0.0.1'
+    host = '141.142.21.57'
     s_to_c_port = 8000
     s_to_c_soc = socket.socket()
     s_to_c_soc.connect((host,s_to_c_port))
@@ -100,7 +100,7 @@ def threadStoC(t):
             update = sh.recv_msg(s_to_c_soc)
             delete = sh.recv_msg(s_to_c_soc)
         except:
-            continue;
+            continue
         dataLock.acquire()
         if len(update)>0:
             updates.append(json.loads(update))
@@ -125,7 +125,7 @@ def handshake(s):
 
 def begin(reg,t):
     global id
-    host = '127.0.0.1'
+    host = '141.142.21.57'
     port = 8000
 
     action = reg

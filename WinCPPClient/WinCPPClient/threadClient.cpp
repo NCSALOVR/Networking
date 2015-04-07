@@ -23,7 +23,7 @@ std::queue<std::string> deletes;
 std::queue<std::tuple<std::string, std::string>> commands;
 std::mutex dataLock;
 std::mutex updateLock;
-const char * host = "127.0.0.1";
+const char * host = "141.142.21.57";
 const char * port = "8000";
 
 void threadCtoS(){
@@ -54,6 +54,7 @@ void threadCtoS(){
 		
 		std::string feedback = recvMsg(cToSSoc);
 		if (feedback.compare("goodbye") == 0){
+			std::cout << "threadCtoS to close" << std::endl;
 			closesocket(cToSSoc);
 			updateLock.unlock();
 			return;
@@ -125,6 +126,7 @@ void threadStoC(float t){
 		Sleep(msInterval);
 		if (updateLock.try_lock()){
 			updateLock.unlock();
+			std::cout << "threadCtoS to end" << std::endl;
 			sendMsg(sToCSoc, "end");
 			recvMsg(sToCSoc);
 			closesocket(sToCSoc);
