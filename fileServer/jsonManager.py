@@ -4,7 +4,9 @@ import sys
 import time
 
 def update(centralJson, localJson):
-    if type(centralJson) is dict and type(localJson) is dict:
+    if centralJson == {}:
+        centralJson = localJson
+    elif type(centralJson) is dict and type(localJson) is dict:
         for local_key, local_value in localJson.iteritems():
             if local_key in centralJson:
                 if (type(centralJson[local_key] ) is dict) or (type(centralJson[local_key] ) is list):

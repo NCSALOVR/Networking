@@ -88,29 +88,19 @@ def threadFunc(conn):
         #manipulate the central json based on the action and data from client    
         if action == 'update':
             stateLock.acquire()
-            if id in central_json_data:
-                central_json_data = jm.update(central_json_data, local_json_data)
-            else:
-                central_json_data = jm.update({},local_json_data)
+            central_json_data = jm.update(central_json_data, local_json_data)
             for x in profiles:
                 profileLock.acquire()
-                if id in x.update:
-                    x.update = jm.update(x.update,local_json_data)
-                else:
-                    x.update = jm.update({},local_json_data)
+                x.update = jm.update(x.update,local_json_data)
                 profileLock.release()
             stateLock.release()
 
         elif action == 'delete':
             stateLock.acquire()
-            if id in central_json_data:
-                central_json_data = jm.delete(central_json_data, local_json_data)
+            central_json_data = jm.delete(central_json_data, local_json_data)
             for x in profiles:
                 profileLock.acquire()
-                if id in x.delete:
-                    x.delete = jm.update(x.delete,local_json_data)
-                else:
-                    x.delete = jm.update({},local_json_data)
+                x.delete = jm.update(x.delete,local_json_data)
                 profileLock.release()
             stateLock.release()
         elif action == 'end':
