@@ -46,7 +46,6 @@ def period(conn,id,t):
         stateLock.release()
 
 def threadFunc(conn):
-    global toEnd
     global central_json_data
     global profiles
     #check with registration
@@ -89,6 +88,7 @@ def threadFunc(conn):
             t = sh.recv_msg(conn)
             periodThread = threading.Thread(target=period, args=(conn,id,float(t)))
             periodThread.start()
+            return
 
         #manipulate the central json based on the action and data from client    
         if action == 'update':
