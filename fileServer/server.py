@@ -48,6 +48,7 @@ def period(conn,id,t):
 def threadFunc(conn):
     global central_json_data
     global profiles
+    global toEnd
     #check with registration
     id = sh.recv_msg(conn)
     p  = 0
@@ -80,6 +81,12 @@ def threadFunc(conn):
         #receiving data to be used in update/delete from client
         action = sh.recv_msg(conn)
         local_json_data = {}
+        if action == 'end_register':
+            sh.send_msg(conn, "goodbye")
+            print "[Register] Connection with profile "+str(id)+" closed"
+            conn.close() 
+            return 
+
         if not (action == 'end' or action == 'period'):
             clientData = sh.recv_msg(conn)
             local_json_data = json.loads(clientData)
@@ -88,7 +95,6 @@ def threadFunc(conn):
             t = sh.recv_msg(conn)
             periodThread = threading.Thread(target=period, args=(conn,id,float(t)))
             periodThread.start()
-            return
 
         #manipulate the central json based on the action and data from client    
         if action == 'update':

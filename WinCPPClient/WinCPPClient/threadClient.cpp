@@ -206,7 +206,7 @@ void begin(std::string action, float t){
 	std::cout << "You are id " << id << std::endl;
 	std::cout << "Use that id to login in the future" << std::endl;
 
-	sendMsg(soc, "end");
+	sendMsg(soc, "end_register");
 	recvMsg(soc);
 	closesocket(soc);
 }
