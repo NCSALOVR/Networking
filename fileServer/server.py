@@ -89,28 +89,28 @@ def threadFunc(conn):
         if action == 'update':
             stateLock.acquire()
             if id in central_json_data:
-                central_json_data[id] = jm.update(central_json_data[id], local_json_data)
+                central_json_data = jm.update(central_json_data, local_json_data)
             else:
-                central_json_data[id] = jm.update({},local_json_data)
+                central_json_data = jm.update({},local_json_data)
             for x in profiles:
                 profileLock.acquire()
                 if id in x.update:
-                    x.update[id] = jm.update(x.update[id],local_json_data)
+                    x.update = jm.update(x.update,local_json_data)
                 else:
-                    x.update[id] = jm.update({},local_json_data)
+                    x.update = jm.update({},local_json_data)
                 profileLock.release()
             stateLock.release()
 
         elif action == 'delete':
             stateLock.acquire()
             if id in central_json_data:
-                central_json_data[id] = jm.delete(central_json_data[id], local_json_data)
+                central_json_data = jm.delete(central_json_data, local_json_data)
             for x in profiles:
                 profileLock.acquire()
                 if id in x.delete:
-                    x.delete[id] = jm.update(x.delete[id],local_json_data)
+                    x.delete = jm.update(x.delete,local_json_data)
                 else:
-                    x.delete[id] = jm.update({},local_json_data)
+                    x.delete = jm.update({},local_json_data)
                 profileLock.release()
             stateLock.release()
         elif action == 'end':
