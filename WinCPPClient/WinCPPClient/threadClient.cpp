@@ -52,12 +52,13 @@ void threadCtoS(){
 			sendMsg(cToSSoc, data);
 		}
 		
-		std::string feedback = recvMsg(cToSSoc);
-		if (feedback.compare("goodbye") == 0){
-			std::cout << "threadCtoS to close" << std::endl;
-			closesocket(cToSSoc);
-			updateLock.unlock();
-			return;
+		if (action.compare("end") == 0){
+			std::string feedback = recvMsg(cToSSoc);
+			if (feedback.compare("goodbye") == 0){
+				closesocket(cToSSoc);
+				updateLock.unlock();
+				return;
+			}
 		}
 	}
 	
@@ -143,10 +144,10 @@ void threadStoC(float t){
 		}
 		
 		dataLock.lock();
-		if (up.length() > 0){
+		if (up.compare("{}") != 0){
 			updates.push(up);
 		}
-		if (del.length() > 0){
+		if (del.compare("{}") != 0){
 			deletes.push(del);
 		}
 		dataLock.unlock();
