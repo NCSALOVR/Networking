@@ -151,7 +151,7 @@ def begin(reg,t):
         
     print "You are id "+str(id)
     print "Use that id to login in the future"
-    sh.send_msg(s,"end")
+    sh.send_msg(s, "end_register")
     sh.recv_msg(s)
     s.close()
     updateLock.acquire()
