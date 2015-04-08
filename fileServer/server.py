@@ -30,9 +30,8 @@ def period(conn,id,t):
             profileLock.release()
             stateLock.release()
             continue
-        
-        
-        if (not sh.send_msg(conn, json.dumps(p.update))) or (not sh.send_msg(conn, json.dumps(p.delete))):
+
+        if not (sh.send_msg(conn, json.dumps(p.update)) and sh.send_msg(conn, json.dumps(p.delete))):
             profileLock.release()
             stateLock.release()
             conn.close()
@@ -122,9 +121,12 @@ def threadFunc(conn):
             return 
 
         #send the updated one back to client
+        '''
         if action == 'update':
             stateLock.acquire()
             profileLock.acquire()
+            print "here"
+            print p.update
             sh.send_msg(conn, json.dumps(p.update))
             profileLock.release()
             stateLock.release()
@@ -138,6 +140,7 @@ def threadFunc(conn):
             stateLock.acquire()
             sh.send_msg(conn, json.dumps(central_json_data))
             stateLock.release()
+        '''
     conn.close()
 
 
