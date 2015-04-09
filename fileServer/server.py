@@ -30,17 +30,15 @@ def period(conn,id,t):
             profileLock.release()
             stateLock.release()
             continue
-
-        if not (sh.send_msg(conn, json.dumps(p.update)) and sh.send_msg(conn, json.dumps(p.delete))):
+        try: 
+            sh.send_msg(conn, json.dumps(p.update))
+            sh.send_msg(conn, json.dumps(p.delete))
+            p.update = {}
+            p.delete = {}
+        except:
             profileLock.release()
             stateLock.release()
-            conn.close()
-            print "Oh dear"
             return
-        print "Sent file for profile "+str(id)
-        print json.dumps(p.update)
-        p.update = {}
-        p.delete = {}
         profileLock.release()
         stateLock.release()
 
@@ -80,6 +78,8 @@ def threadFunc(conn):
         #receiving data to be used in update/delete from client
         action = sh.recv_msg(conn)
         local_json_data = {}
+
+        #in the case to close the first connection to register the id
         if action == 'end_register':
             sh.send_msg(conn, "goodbye")
             print "[Register] Connection with profile "+str(id)+" closed"
@@ -120,27 +120,6 @@ def threadFunc(conn):
             conn.close() 
             return 
 
-        #send the updated one back to client
-        '''
-        if action == 'update':
-            stateLock.acquire()
-            profileLock.acquire()
-            print "here"
-            print p.update
-            sh.send_msg(conn, json.dumps(p.update))
-            profileLock.release()
-            stateLock.release()
-        elif action == 'delete':
-            stateLock.acquire()
-            profileLock.acquire()
-            sh.send_msg(conn, json.dumps(p.delete))
-            profileLock.release()
-            stateLock.release()
-        else:
-            stateLock.acquire()
-            sh.send_msg(conn, json.dumps(central_json_data))
-            stateLock.release()
-        '''
     conn.close()
 
 

@@ -31,11 +31,13 @@ def threadCtoS():
             data = command[1]
             sh.send_msg(c_to_s_soc,json.dumps(data))
         #receiving the update from server
-        serverData = sh.recv_msg(c_to_s_soc)
-        if serverData == "goodbye":
-            c_to_s_soc.close()
-            updateLock.release()
-            break
+
+        if action == "end":    
+            serverData = sh.recv_msg(c_to_s_soc)
+            if serverData == "goodbye":
+                c_to_s_soc.close()
+                updateLock.release()
+                break
     print "threadCtoS finished"
 
 def getUpdate():
@@ -94,6 +96,7 @@ def threadStoC(t):
         if(updateLock.acquire(False)):
             updateLock.release()
             sh.send_msg(s_to_c_soc,"end")
+            sh.recv_msg(s_to_c_soc)
             s_to_c_soc.close()
             break;
         try:
@@ -102,9 +105,9 @@ def threadStoC(t):
         except:
             continue
         dataLock.acquire()
-        if len(update)>0:
+        if update != "{}":
             updates.append(json.loads(update))
-        if len(delete)>0:
+        if delete != "{}":
             deletes.append(json.loads(delete))
         dataLock.release()
     print "threadStoC finished"

@@ -3,11 +3,7 @@ import struct
 
 def send_msg(conn,msg):
     bytes_send = struct.pack('!I', len(msg)) + msg
-    try:
-        conn.sendall(bytes_send)
-    except:
-        return False
-    return True
+    conn.sendall(bytes_send)
 
 def recv_msg(conn):
     msg_len = struct.unpack('!I', recv_num_bytes(conn, struct.calcsize('!I')))[0]
