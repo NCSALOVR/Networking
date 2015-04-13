@@ -25,6 +25,28 @@ def update(centralJson, localJson):
 	'''
     return centralJson
 
+def update_for_output(centralJson, localJson):
+    if centralJson == {}:
+        centralJson = localJson
+    elif type(centralJson) is dict and type(localJson) is dict:
+        for local_key, local_value in localJson.iteritems():
+            if local_key in centralJson:
+                if (type(centralJson[local_key] ) is dict) or (type(centralJson[local_key] ) is list):
+                    centralJson[local_key] = update(centralJson[local_key], localJson[local_key])
+                else:
+                    centralJson[local_key] = localJson[local_key]
+            else:
+                centralJson[local_key] = localJson[local_key]
+            
+    elif type(centralJson) is list and type(localJson) is list:
+        centralJson = centralJson+localJson
+	'''
+        for local_elem in localJson:
+            if local_elem not in centralJson:
+                centralJson.append(local_elem)   
+	'''
+    return centralJson
+
 
 def delete(centralJson, localJson):
     if type(centralJson) is dict and type(localJson) is dict:

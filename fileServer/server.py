@@ -30,9 +30,17 @@ def period(conn,id,t):
             profileLock.release()
             stateLock.release()
             continue
-        try: 
+        try:
+            '''to_send_update = {}
+            to_send_delete = {}
+            for key in p.update.keys():
+                to_send_update = jm.update_for_output(to_send_update,p.update[key])
+            for key in p.delete.keys():
+                to_send_delete = jm.update_for_output(to_send_delete,p.delete[key])'''
             sh.send_msg(conn, json.dumps(p.update))
             sh.send_msg(conn, json.dumps(p.delete))
+            print 'here'
+            print  json.dumps(p.update)
             p.update = {}
             p.delete = {}
         except:
@@ -98,19 +106,29 @@ def threadFunc(conn):
         #manipulate the central json based on the action and data from client    
         if action == 'update':
             stateLock.acquire()
-            central_json_data = jm.update(central_json_data, local_json_data)
+            if id in central_json_data:
+                central_json_data[id] = jm.update(central_json_data[id], local_json_data)
+            else:
+                central_json_data[id] = jm.update({},local_json_data)
             for x in profiles:
                 profileLock.acquire()
-                x.update = jm.update(x.update,local_json_data)
+                if id in x.update:
+                    x.update[id] = jm.update(x.update[id], local_json_data)
+                else:
+                    x.update[id] = jm.update({},local_json_data)
                 profileLock.release()
             stateLock.release()
 
         elif action == 'delete':
             stateLock.acquire()
-            central_json_data = jm.delete(central_json_data, local_json_data)
+            if id in central_json_data:
+                central_json_data[id] = jm.delete(central_json_data[id], local_json_data)
             for x in profiles:
                 profileLock.acquire()
-                x.delete = jm.update(x.delete,local_json_data)
+                if id in x.update:
+                    x.delete[id] = jm.update(x.delete[id], local_json_data)
+                else:
+                    x.delete[id] = jm.update({},local_json_data)
                 profileLock.release()
             stateLock.release()
         elif action == 'end':
