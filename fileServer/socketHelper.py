@@ -1,3 +1,9 @@
+'''
+The prototype version. Please refer to ../WinCPPClient/WinCPPClient/socketHelper.cpp for the actual c++ code that is used in VIVE.
+Note: There might be small differences due to different in the two languages. 
+Also, there is the addition of setupClientSocket() in socketHelper.cpp 
+due to the relatively complex socket creation and connection in Window C++ (i.e., socket.socket() and connect((host,port)) in python).
+'''
 import socket
 import struct
 

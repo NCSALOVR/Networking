@@ -14,10 +14,14 @@ stateLock = threading.Lock()
 profileLock = threading.Lock()
 toEnd = False
 
+'''
+The function to be run on a thread and send update/delete data to the clients every t second(s).
+'''
 def period(conn,id,t):
     global toEnd
     while(True):
-        time.sleep(t)        
+        time.sleep(t)
+        # toEnd would be set to true when the end command is received in threadFunc()         
         if toEnd:
             break
         stateLock.acquire()
@@ -31,16 +35,8 @@ def period(conn,id,t):
             stateLock.release()
             continue
         try:
-            '''to_send_update = {}
-            to_send_delete = {}
-            for key in p.update.keys():
-                to_send_update = jm.update_for_output(to_send_update,p.update[key])
-            for key in p.delete.keys():
-                to_send_delete = jm.update_for_output(to_send_delete,p.delete[key])'''
             sh.send_msg(conn, json.dumps(p.update))
             sh.send_msg(conn, json.dumps(p.delete))
-            print 'here'
-            print  json.dumps(p.update)
             p.update = {}
             p.delete = {}
         except:
@@ -50,11 +46,15 @@ def period(conn,id,t):
         profileLock.release()
         stateLock.release()
 
+'''
+The target function to be run on a thread. It receive the command action (and data if applicable) from the client and perform accordingly.
+'''
 def threadFunc(conn):
     global central_json_data
     global profiles
     global toEnd
-    #check with registration
+
+    #registration. assign a new id or check that the id receive from the client is valid
     id = sh.recv_msg(conn)
     p  = 0
     if id == "new":
@@ -82,28 +82,32 @@ def threadFunc(conn):
             return
     sh.send_msg(conn,"ok")
     id = p.id
+
+
     while(True):
-        #receiving data to be used in update/delete from client
+        #receiving commmand action (i.e., update/delete/period/end/end_register)
         action = sh.recv_msg(conn)
         local_json_data = {}
 
-        #in the case to close the first connection to register the id
+        #the case to close the first connection to register the id
         if action == 'end_register':
             sh.send_msg(conn, "goodbye")
             print "[Register] Connection with profile "+str(id)+" closed"
             conn.close() 
             return 
 
+        #receive data to be use in update/delete
         if not (action == 'end' or action == 'period'):
             clientData = sh.recv_msg(conn)
             local_json_data = json.loads(clientData)
 
+        #in the case of period action, spawn a thread to periodically send update/delete data to the client.
         if action == 'period':
             t = sh.recv_msg(conn)
             periodThread = threading.Thread(target=period, args=(conn,id,float(t)))
             periodThread.start()
 
-        #manipulate the central json based on the action and data from client    
+        #in the case of update or delete action, manipulate the central json based on the action and data from client.    
         if action == 'update':
             stateLock.acquire()
             if id in central_json_data:
@@ -131,6 +135,8 @@ def threadFunc(conn):
                     x.delete[id] = jm.update({},local_json_data)
                 profileLock.release()
             stateLock.release()
+
+        #in the case of end action, close the connection.
         elif action == 'end':
             sh.send_msg(conn, "goodbye")
             print "Connection with profile "+str(id)+" closed"
@@ -151,6 +157,7 @@ if __name__ == '__main__':
     while True:
         conn, addr = s.accept()
         print "Received connection from client: " + str(addr)
+        #spawning a thread for each connection with a client
         t = threading.Thread(target=threadFunc, args=(conn,))
         t.start()
     s.close()

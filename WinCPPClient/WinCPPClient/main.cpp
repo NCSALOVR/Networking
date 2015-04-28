@@ -19,19 +19,14 @@
 
 
 int main(int argc, char* argv[]) {
-
-	const char * host = "141.142.21.57";
-	int port = 8000;
-
 	//setting up and initialize winsock
 	WSADATA wsaData;
-	if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
-	{
+	if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0){
 		fprintf(stderr, "WSAStartup() failed");
 		exit(1);
 	}
 
-	//registration
+	//getting parameter action for begin()
 	std::string action;
 	std::cout << "Registration ('new'/your id/'end'): ";
 	getline(std::cin, action);
@@ -50,11 +45,15 @@ int main(int argc, char* argv[]) {
 	}
 
 	begin(action, t);
+	//spawn the two threads to communicate both ways with the server
 	std::thread tWrite(threadCtoS);
 	std::thread tRead(threadStoC, t);
 
+	/*
+	Receive the action (i.e., update/delete/end) and the file path to be used in update/delete from the terminal, and get an update from the updates queue in each iteration.
+	The loop is to be replaced in the actual VIVE application to reflect the actual data to send to the server, and the actual use of data from the updates and delete queues.
+	*/
 	while (true){
-
 		std::string update = getUpdate();
 		if (update.length() != 0){
 			std::cout << update << std::endl;

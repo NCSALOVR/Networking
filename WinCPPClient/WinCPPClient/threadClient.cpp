@@ -39,19 +39,24 @@ void threadCtoS(){
 	}
 
 	while (true){
+		//if there's nothing in the commands queue, continue on the loop
 		std::tuple<std::string, std::string> command = getCommand();
 		if (command == std::tuple<std::string, std::string>("",""))
 			continue;
+
+		//send the valid command action (i.e., end, update, or delete)
 		std::string action = std::get<0>(command);
 		if (action.compare("end") != 0 && action.compare("update") != 0 && action.compare("delete") != 0)
 			continue;
 		sendMsg(cToSSoc, action);
 
+		//send the data if the action is update or delete
 		if (action.compare("update") == 0 || action.compare("delete") == 0){
 			std::string data = std::get<1>(command);
 			sendMsg(cToSSoc, data);
 		}
 		
+		//close the socket and end the function if the action is end
 		if (action.compare("end") == 0){
 			std::string feedback = recvMsg(cToSSoc);
 			if (feedback.compare("goodbye") == 0){
@@ -111,7 +116,9 @@ void threadStoC(float t){
 	DWORD msInterval = t * 1000;
 	SOCKET sToCSoc = setupClientSocket(host, port);
 
+	//set timeout for recv() to be the same as period interval t
 	setsockopt(sToCSoc, SOL_SOCKET, SO_RCVTIMEO, (char *)&msInterval, sizeof(DWORD));
+
 	if (sToCSoc == INVALID_SOCKET){
 		return;
 	}
@@ -120,11 +127,18 @@ void threadStoC(float t){
 		return;
 	}
 
+	//send period action to the server
 	sendMsg(sToCSoc, "period");
 	sendMsg(sToCSoc, std::to_string(t));
 
 	while (true){
 		Sleep(msInterval);
+
+		/*
+		The function can only acquire the update lock when the end command has been sent to the server in the threadCtoS()
+		and the thread to send update/delete to the server is about to terminate. 
+		So upon acquiring the updatelock (i.e., updateLock.try_lock() is true), close the socket and exit from the function to terminate the thread.
+		*/
 		if (updateLock.try_lock()){
 			updateLock.unlock();
 			std::cout << "threadCtoS to end" << std::endl;
@@ -133,16 +147,19 @@ void threadStoC(float t){
 			closesocket(sToCSoc);
 			break;
 		}
+
 		std::string up;
 		std::string del;
 		try{
 			up = recvMsg(sToCSoc);
 			del = recvMsg(sToCSoc);
 		}
+		//this is in the case of timeout (i.e., nothing has been sent from the server)
 		catch (const std::runtime_error& e) {
 			continue;
 		}
 		
+		//push the received nonempty update and delete to the queues.
 		dataLock.lock();
 		if (up.compare("{}") != 0){
 			updates.push(up);
@@ -171,7 +188,6 @@ bool handshake(SOCKET soc){
 		std::cout << "Error in handshake, please close program" << std::endl;
 		return false;
 	}
-
 }
 
 void begin(std::string action, float t){
@@ -190,6 +206,7 @@ void begin(std::string action, float t){
 		id = std::stol(recvMsg(soc));
 	}
 	else{
+		//in the case that parameter action is the existing id
 		sendMsg(soc, action);
 	}
 

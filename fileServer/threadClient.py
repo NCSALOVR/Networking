@@ -1,3 +1,7 @@
+'''
+The prototype version. Please refer to ../WinCPPClient/WinCPPClient/threadClient.cpp for the actual c++ code that is used in VIVE.
+Note: There might be small differences due to different in the two languages.
+'''
 import socket
 import os
 import threading

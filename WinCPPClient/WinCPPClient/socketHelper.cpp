@@ -66,16 +66,19 @@ void sendMsg(SOCKET sockfd, std::string msg){
 	const char* cMsg = msg.c_str();
 	size_t length = strlen(cMsg);
 	uint32_t nlength = htonl(length);
+	//send the length (i.e., number of bytes) of the message
 	send(sockfd, (char*)&nlength, 4, 0);
+	//send the actual message
 	send(sockfd, cMsg, length, 0);
 }
 
 std::string recvMsg(SOCKET sockfd){
 	uint32_t length, nlength;
 
-	//getting the first 4 bytes
 	int num_bytes_recv = 0;
 	int curr_num_bytes_recv;
+
+	//getting the first 4 bytes, which store number of bytes of the msg
 	while (num_bytes_recv < 4){
 		curr_num_bytes_recv = recv(sockfd, ((char*)&nlength) + num_bytes_recv, 4 - num_bytes_recv, 0);
 		if (curr_num_bytes_recv == 0){
@@ -94,9 +97,10 @@ std::string recvMsg(SOCKET sockfd){
 std::string recvNumBytes(SOCKET sockfd, uint32_t num_bytes){
 	char* data = (char*)malloc(num_bytes + 1);
 	data[num_bytes] = '\0';
-
 	uint32_t num_bytes_recv = 0;
 	uint32_t curr_num_bytes_recv;
+
+	//loop until we recieve all the num_bytes
 	while (num_bytes_recv < num_bytes){
 		curr_num_bytes_recv = recv(sockfd, data + num_bytes_recv, num_bytes - num_bytes_recv, 0);
 		num_bytes_recv += curr_num_bytes_recv;
