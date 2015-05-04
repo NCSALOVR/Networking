@@ -14,10 +14,13 @@ deletes = []
 commands = []
 dataLock = threading.Lock()
 updateLock = threading.Lock()
+host = '127.0.0.1'
+port = 8000
 
 def threadCtoS():
-    host = '141.142.21.57'
-    c_to_s_port = 8000
+    global host
+    global port
+    c_to_s_port = port
     c_to_s_soc = socket.socket()
     c_to_s_soc.connect((host,c_to_s_port))
     if not (handshake(c_to_s_soc)):
@@ -83,8 +86,9 @@ def sendCommand(command, data = {}):
     return
 
 def threadStoC(t):
-    host = '141.142.21.57'
-    s_to_c_port = 8000
+    global host
+    global port
+    s_to_c_port = port
     s_to_c_soc = socket.socket()
     s_to_c_soc.connect((host,s_to_c_port))
     s_to_c_soc.settimeout(t)
@@ -132,8 +136,8 @@ def handshake(s):
 
 def begin(reg,t):
     global id
-    host = '141.142.21.57'
-    port = 8000
+    global host
+    global port
 
     action = reg
     if action == "end":

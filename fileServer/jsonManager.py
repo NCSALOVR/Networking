@@ -19,10 +19,8 @@ def update(centralJson, localJson):
                     centralJson[local_key] = localJson[local_key]
             else:
                 centralJson[local_key] = localJson[local_key]
-    '''
-    To update the list, the old list is simply replaced by the new list. 
-    This is suited with the current way that VIVE send the update data; it might need to be edited in the future.
-    '''
+    #To update the list, the old list is simply replaced by the new list. 
+    #This is suited with the current way that VIVE send the update data; it might need to be edited in the future.
     elif type(centralJson) is list and type(localJson) is list:
         centralJson = localJson
 	'''

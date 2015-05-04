@@ -148,7 +148,7 @@ def threadFunc(conn):
 
 
 if __name__ == '__main__':
-    host = '141.142.21.57'
+    host = '127.0.0.1'
     port = 8000
     s = socket.socket()
     s.bind((host,port))

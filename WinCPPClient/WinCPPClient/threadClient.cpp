@@ -23,7 +23,7 @@ std::queue<std::string> deletes;
 std::queue<std::tuple<std::string, std::string>> commands;
 std::mutex dataLock;
 std::mutex updateLock;
-const char * host = "141.142.21.57";
+const char * host = "127.0.0.1";
 const char * port = "8000";
 
 void threadCtoS(){
